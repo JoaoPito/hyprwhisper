@@ -47,7 +47,7 @@ def service():
     # IF PARAMETER IS SET:
         # Using clipboard tool, copy transcript
     
-    #os.remove(filepath)
+    os.remove(filepath)
 
 def start_service():
     service_thread = threading.Thread(target=service)
@@ -64,5 +64,4 @@ def toggle():
     return "> Recording\n" if is_recording else "> Transcribing\n"
 
 if __name__ == '__main__':
-    #start_service()
     app.run(debug=True)
