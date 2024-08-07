@@ -6,10 +6,11 @@ from PIL import Image
 TEMPORARY_DIR_VAR = "TEMP_FOLDER"
 
 command = 'grim "{filepath}" && notify-send "hyprwhisper" "Screenshot taken"'
-image_size = (1280, 720)
+image_size = (1920, 1080)
 
 def get_screenshot():
-    """Get a recent screenshot of the user's computer.
+    """Get a screenshot of the user's computer. The screenshot will be available to you after executing.
+    Use this whenever the user mentions about something that is on their screen or when you need to see what he/she is talking about.
 
     Returns:
         The status of the command.
