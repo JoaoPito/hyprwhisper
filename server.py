@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from flask import Flask
 import threading
@@ -23,13 +23,12 @@ whisper = WhisperClient()
 
 app = Flask(__name__)
 
-last_request = None
+last_request = datetime.now()
 is_recording = False
 flag_lock = threading.Lock()
 
 def service():
     global is_recording
-    
     
     audio_recorder = Recorder()
     filepath = f"./temp_recording_{datetime.now().strftime("%d%m%y_%H%M%S")}.wav"
@@ -49,21 +48,15 @@ def service():
     print(f"> '{transcription}'")
     
     print(f"> LLM")
-    print(f"> '{transcription}'")
-    
-    print(f"> LLM")
     global last_request
     
-    if(datetime.now() - last_request > CONTEXT_TIMEOUT_MIN * 60):
+    if(datetime.now() - last_request >= timedelta(minutes=CONTEXT_TIMEOUT_MIN)):
         llm.clear_chat()
     
     last_request = datetime.now()
     llm_response = llm.invoke(transcription)
     print(llm_response)
-    llm_response = llm.invoke(transcription)
-    print(llm_response)
     
-
     # IF THERE PARAMETER --transcript IS NOT SET:
         # Send results to googlellm
         # Any results from LLM print to the user (or speak)
