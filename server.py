@@ -11,14 +11,15 @@ from whisper import WhisperClient
 load_dotenv()
 
 # CONFIG
-CONTEXT_TIMEOUT_MIN = 30
+CONTEXT_TIMEOUT_MIN = 1
 TEMPORARY_DIR_VAR = "TEMP_FOLDER"
 
 # Assign tools to LLM
 from tools.screenshot import get_screenshot
+from tools.clipboard import paste_from_clipboard, copy_to_clipboard
 
-tools = [get_screenshot]
-llm = GoogleLLM(tools=tools)
+tools = [get_screenshot, paste_from_clipboard, copy_to_clipboard]
+llm = GoogleLLM(model_name="gemini-1.5-pro", tools=tools)
 
 whisper = WhisperClient()
 
@@ -46,7 +47,7 @@ def service():
     audio_recorder.save_to_file(recording_filepath)
     print("> Transcribing")
     transcription = whisper.transcribe(open(recording_filepath, "rb"))
-    print(f"> '{transcription}'")
+    print(f"'{transcription}'")
     os.remove(recording_filepath)
     
     print(f"> LLM")
@@ -54,10 +55,12 @@ def service():
     
     if(datetime.now() - last_request >= timedelta(minutes=CONTEXT_TIMEOUT_MIN)):
         llm.clear_chat()
+        print("=> Chat cleared")
     
     last_request = datetime.now()
     llm_response = llm.invoke(transcription)
     print(llm_response)
+    copy_to_clipboard(llm_response)
     
     # IF THERE PARAMETER --transcript IS NOT SET:
         # Send results to googlellm
@@ -65,8 +68,6 @@ def service():
     # IF PARAMETER IS SET:
         # Using clipboard tool, copy transcript
     
-    
-
 def start_service():
     service_thread = threading.Thread(target=service)
     service_thread.daemon = True

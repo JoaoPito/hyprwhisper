@@ -74,7 +74,8 @@ class GoogleLLM():
         return {tool.__name__: tool for tool in tools}
     
     def __has_called_tools__(self, response):
-        return "function_call" in response.parts
+        print([part for part in response.candidates[0].content.parts ][0])
+        return "function_call" in [part for part in response.candidates[0].content.parts]
     
     def __use_tools__(self, response):
         tool_results = {}
@@ -93,6 +94,10 @@ class GoogleLLM():
         ]
         
     def __build_tools_attachment_responses__(self, results):
-        return [Image.open(att) for _, (_, att_list) in results.items() 
+        att_results = []
+        if results.items() is not None:
+            att_results = [Image.open(att) for _, (_, att_list) in results.items()
+                            if att_list is not None 
                             for att in att_list 
                             if self.__validate_img_extension__(att)]
+        return att_results
