@@ -39,7 +39,7 @@ class GoogleLLM():
             response = self.model.generate_content(contents, 
                                                 safety_settings=self.safety_settings,
                                                 generation_config=self.gen_config)
-        return response.text
+        return response
     
     def __create_prompt_contents__(self, text, images):
         contents = []
