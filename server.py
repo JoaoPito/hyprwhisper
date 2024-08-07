@@ -49,6 +49,17 @@ def service():
     print(f"> '{transcription}'")
     
     print(f"> LLM")
+    print(f"> '{transcription}'")
+    
+    print(f"> LLM")
+    global last_request
+    
+    if(datetime.now() - last_request > CONTEXT_TIMEOUT_MIN * 60):
+        llm.clear_chat()
+    
+    last_request = datetime.now()
+    llm_response = llm.invoke(transcription)
+    print(llm_response)
     llm_response = llm.invoke(transcription)
     print(llm_response)
     
