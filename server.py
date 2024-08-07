@@ -5,19 +5,31 @@ import threading
 
 from dotenv import load_dotenv
 from audio import Recorder
+from google_llm import GoogleLLM
 from whisper import WhisperClient
 
 load_dotenv()
+
+# CONFIG
+CONTEXT_TIMEOUT_MIN = 30
+
+# Assign tools to LLM
+from tools.screenshot import get_screenshot
+
+tools = [get_screenshot]
+llm = GoogleLLM(tools=tools)
 
 whisper = WhisperClient()
 
 app = Flask(__name__)
 
+last_request = None
 is_recording = False
 flag_lock = threading.Lock()
 
 def service():
     global is_recording
+    
     
     audio_recorder = Recorder()
     filepath = f"./temp_recording_{datetime.now().strftime("%d%m%y_%H%M%S")}.wav"
@@ -34,13 +46,13 @@ def service():
     audio_recorder.save_to_file(filepath)
     print("> Transcribing")
     transcription = whisper.transcribe(open(filepath, "rb"))
-    print(transcription)
+    print(f"> '{transcription}'")
     
-    # CONFIG
-    # Assign tools to LLM
+    print(f"> LLM")
+    llm_response = llm.invoke(transcription)
+    print(llm_response)
     
-    # Record audio from microphone
-    # Send it to whisper and get results
+
     # IF THERE PARAMETER --transcript IS NOT SET:
         # Send results to googlellm
         # Any results from LLM print to the user (or speak)
