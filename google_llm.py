@@ -27,11 +27,11 @@ class GoogleLLM():
                                             system_instruction=system,
                                             tools=tools)
 
-    def invoke(self, text_prompt, images=None, use_history=True):
+    def invoke(self, text_prompt, images=[], use_history=True):
         contents = self.__create_prompt_contents__(text_prompt, images)
         if(use_history):
             if self.chat == None:
-                self.chat = self.model.chat
+                self.chat = self.model.start_chat()
             response = self.chat.send_message(contents, 
                                                 safety_settings=self.safety_settings,
                                                 generation_config=self.gen_config)
@@ -39,14 +39,14 @@ class GoogleLLM():
             response = self.model.generate_content(contents, 
                                                 safety_settings=self.safety_settings,
                                                 generation_config=self.gen_config)
-        return response
+        return response.text
     
     def __create_prompt_contents__(self, text, images):
         contents = []
         for img_url in images:
             image = Image.open(img_url)
-            contents.append(("image", image))
-        contents.append(("text", text))
+            contents.append(image)
+        contents.append(text)
         return contents
     
     def clear_history(self):
