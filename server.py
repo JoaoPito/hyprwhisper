@@ -12,6 +12,7 @@ load_dotenv()
 
 # CONFIG
 CONTEXT_TIMEOUT_MIN = 30
+TEMPORARY_DIR_VAR = "TEMP_FOLDER"
 
 # Assign tools to LLM
 from tools.screenshot import get_screenshot
@@ -31,7 +32,7 @@ def service():
     global is_recording
     
     audio_recorder = Recorder()
-    filepath = f"./temp_recording_{datetime.now().strftime("%d%m%y_%H%M%S")}.wav"
+    recording_filepath = os.path.join(os.getenv(TEMPORARY_DIR_VAR), f"rec_{datetime.now().strftime("%d%m%y_%H%M%S")}.wav")
 
     print("> Recording")
     while True:
@@ -42,10 +43,11 @@ def service():
         print(".", end='', flush=True)
         audio_recorder.record_audio_frame()
             
-    audio_recorder.save_to_file(filepath)
+    audio_recorder.save_to_file(recording_filepath)
     print("> Transcribing")
-    transcription = whisper.transcribe(open(filepath, "rb"))
+    transcription = whisper.transcribe(open(recording_filepath, "rb"))
     print(f"> '{transcription}'")
+    os.remove(recording_filepath)
     
     print(f"> LLM")
     global last_request
@@ -63,7 +65,7 @@ def service():
     # IF PARAMETER IS SET:
         # Using clipboard tool, copy transcript
     
-    os.remove(filepath)
+    
 
 def start_service():
     service_thread = threading.Thread(target=service)
