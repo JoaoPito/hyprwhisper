@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import os
+import queue
 from flask import Flask
 import threading
 
@@ -29,7 +30,7 @@ last_request = datetime.now()
 is_recording = False
 flag_lock = threading.Lock()
 
-def service():
+def service(q: queue.Queue):
     global is_recording
     
     audio_recorder = Recorder()
@@ -61,26 +62,31 @@ def service():
     llm_response = llm.invoke(transcription)
     print(llm_response)
     copy_to_clipboard(llm_response)
+    q.put(llm_response)
     
-    # IF THERE PARAMETER --transcript IS NOT SET:
-        # Send results to googlellm
-        # Any results from LLM print to the user (or speak)
-    # IF PARAMETER IS SET:
-        # Using clipboard tool, copy transcript
-    
+service_thread = None
+service_queue = None
 def start_service():
-    service_thread = threading.Thread(target=service)
-    service_thread.daemon = True
-    service_thread.start()
+    global service_thread
+    global service_queue
+    if service_thread == None:
+        service_queue = queue.Queue()
+        service_thread = threading.Thread(target=service, args=(service_queue,))
+        print("Starting...")
+        service_thread.start()
+        return "Recording\n"
+    else:
+        service_thread.join()
+        service_thread = None
+        return service_queue.get()
 
 @app.route('/')
 def toggle():
     global is_recording
     with flag_lock:
         is_recording = not is_recording
-        if(is_recording):
-            start_service()
-    return "> Recording\n" if is_recording else "> Transcribing\n"
+    service_result = start_service()
+    return f"> {service_result}"
 
 if __name__ == '__main__':
     app.run(debug=True)
