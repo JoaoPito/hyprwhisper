@@ -1,7 +1,10 @@
 import subprocess
 
+from tools.cmd_utils import escape_characters
+from tools.notification import notify
+
 PASTE_CMD = 'wl-paste'
-COPY_CMD = 'wl-copy'
+COPY_CMD = 'echo "{text}" | wl-copy'
 
 def paste_from_clipboard():
     """Get the contents of the computer's clipboard.
@@ -10,10 +13,12 @@ def paste_from_clipboard():
     Returns:
         The contents of the clipboard in text form.
     """
-    process = subprocess.run([PASTE_CMD], stdout=subprocess.PIPE)
+    process = subprocess.run([PASTE_CMD], stdout=subprocess.PIPE, shell=True)
     if process.stderr:
         return (f"Error using clipboard.\n({process.stderr})", [])
     text = process.stdout.decode('utf-8').strip('\n')
+    
+    notify("Copied text from clipboard.")
     return (text, None)
 
 def copy_to_clipboard(text: str):
@@ -26,8 +31,11 @@ def copy_to_clipboard(text: str):
     Returns: The status of the command.
     """
 
-    command = f'echo "{text}" | {COPY_CMD}'
-    process = subprocess.run([command], stdout=subprocess.PIPE)
+    command = COPY_CMD.format(text=escape_characters(text))
+    process = subprocess.run([command], stdout=subprocess.PIPE, shell=True)
+    
+    notify("Text copied to clipboard.")
     if process.stderr:
         return (f"Error using clipboard.\n({process.stderr})", [])
     return ("Copied to clipboard.", None)
+

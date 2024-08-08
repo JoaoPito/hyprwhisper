@@ -2,10 +2,11 @@ import os
 from datetime import datetime
 import subprocess
 from PIL import Image
+from tools.notification import notify
 
 TEMPORARY_DIR_VAR = "TEMP_FOLDER"
 
-command = 'grim "{filepath}" && notify-send "hyprwhisper" "Screenshot taken"'
+command = 'grim "{filepath}"'
 image_size = (1920, 1080)
 
 def get_screenshot():
@@ -18,6 +19,8 @@ def get_screenshot():
     filepath = os.path.join(os.getenv(TEMPORARY_DIR_VAR), f"temp_{datetime.now().strftime("%d%m-%H%M%S")}.png")
     final_command = command.format(filepath=filepath)
     result = subprocess.run(final_command, shell=True, capture_output=True, text=True)
+    
+    notify("Taken screenshot.")
     
     if result.stderr:
         return (f"Error taking screenshot.\n({result.stderr})", [])
