@@ -18,7 +18,7 @@ def paste_from_clipboard():
         return (f"Error using clipboard.\n({process.stderr})", [])
     text = process.stdout.decode('utf-8').strip('\n')
     
-    notify("Copied text from clipboard.")
+    notify("Got text from clipboard.")
     return (text, None)
 
 def copy_to_clipboard(text: str):
@@ -34,7 +34,7 @@ def copy_to_clipboard(text: str):
     command = COPY_CMD.format(text=escape_characters(text))
     process = subprocess.run([command], stdout=subprocess.PIPE, shell=True)
     
-    notify("Text copied to clipboard.")
+    notify("Put text into clipboard.")
     if process.stderr:
         return (f"Error using clipboard.\n({process.stderr})", [])
     return ("Copied to clipboard.", None)
