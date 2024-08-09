@@ -1,12 +1,13 @@
 # hyprwhisper
 
+## Dependencies
 - faster-whisper-server
-- Ollama (?)
+- Ollama (optional)
 
-## Tools
-### Clipboard
+### For Tools
+#### Clipboard
 - wl-clipboard
 
-### Screenshot
+#### Screenshot
 - grim
 - ImageMagick convert
