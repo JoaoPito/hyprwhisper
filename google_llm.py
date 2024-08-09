@@ -21,7 +21,7 @@ class GoogleLLM():
     }
 
     def __init__(self, model_name='gemini-1.5-flash',
-                system='You are an exceptional AI assistant.',
+                system='You are an exceptional AI assistant tied to a computer. You have access to tools that can be used to do various tasks. You also have access to images that you can see and interpret.',
                 tools=None):
         genai.configure(api_key=os.getenv(GOOGLE_ENV_VAR))
         self.model = genai.GenerativeModel(model_name=model_name, 
@@ -100,4 +100,5 @@ class GoogleLLM():
                             if att_list is not None 
                             for att in att_list 
                             if self.__validate_img_extension__(att)]
+
         return att_results
