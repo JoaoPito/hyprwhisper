@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 from tools.cmd_utils import escape_characters
@@ -9,6 +10,7 @@ COPY_CMD = 'echo "{text}" | wl-copy'
 def paste_from_clipboard():
     """Get the contents of the computer's clipboard.
     Use this whenever the user talks about something that he/she has copied or sent to you.
+    This tool can show you an image that the user may have copied.
 
     Returns:
         The contents of the clipboard in text form.
@@ -17,8 +19,12 @@ def paste_from_clipboard():
     if process.stderr:
         return (f"Error using clipboard.\n({process.stderr})", [])
     text = process.stdout.decode('utf-8').strip('\n')
-    
     notify("Got text from clipboard.")
+    
+    if os.path.isfile(text):
+        notify("Opened image from clipboard.")
+        return ("Showing image.", [text])
+
     return (text, None)
 
 def copy_to_clipboard(text: str):
